@@ -1,0 +1,204 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #020617;
+    --card-bg: rgba(15, 23, 42, 0.85);
+    --card-border: rgba(30, 41, 59, 0.9);
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-pending: #475569;
+    --accent: #06b6d4;
+    --accent-glow: rgba(6, 182, 212, 0.4);
+  }
+
+  [data-theme="light-clean"] {
+    --bg-main: #f8fafc;
+    --card-bg: #ffffff;
+    --card-border: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-muted: #64748b;
+    --text-pending: #94a3b8;
+    --accent: #0284c7;
+    --accent-glow: rgba(2, 132, 199, 0.25);
+  }
+
+  [data-theme="cyberpunk"] {
+    --bg-main: #0a0518;
+    --card-bg: rgba(24, 13, 46, 0.85);
+    --card-border: rgba(91, 33, 182, 0.6);
+    --text-primary: #fdf4ff;
+    --text-muted: #d946ef;
+    --text-pending: #701a75;
+    --accent: #06b6d4;
+    --accent-glow: rgba(217, 70, 239, 0.4);
+  }
+
+  [data-theme="terminal"] {
+    --bg-main: #050d05;
+    --card-bg: rgba(10, 25, 12, 0.9);
+    --card-border: rgba(34, 197, 94, 0.35);
+    --text-primary: #4ade80;
+    --text-muted: #22c55e;
+    --text-pending: #14532d;
+    --accent: #22c55e;
+    --accent-glow: rgba(34, 197, 94, 0.4);
+  }
+
+  [data-theme="sepia"] {
+    --bg-main: #231c16;
+    --card-bg: #332921;
+    --card-border: #4d3d32;
+    --text-primary: #f5eedc;
+    --text-muted: #d4c2a8;
+    --text-pending: #786553;
+    --accent: #e5a458;
+    --accent-glow: rgba(229, 164, 88, 0.35);
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+/* ==========================================================================
+   Light Clean Theme Polishing
+   ========================================================================== */
+[data-theme="light-clean"] {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* Surfaces and Cards */
+[data-theme="light-clean"] .bg-slate-900,
+[data-theme="light-clean"] .bg-slate-950,
+[data-theme="light-clean"] [class*="bg-slate-900"],
+[data-theme="light-clean"] [class*="bg-slate-950"] {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* Crisp Light Borders */
+[data-theme="light-clean"] .border-slate-800,
+[data-theme="light-clean"] .border-slate-700,
+[data-theme="light-clean"] [class*="border-slate-800"],
+[data-theme="light-clean"] [class*="border-slate-700"] {
+  border-color: #e2e8f0 !important;
+}
+
+/* Buttons and secondary tiles */
+[data-theme="light-clean"] .bg-slate-800,
+[data-theme="light-clean"] [class*="bg-slate-800"] {
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+  border-color: #cbd5e1 !important;
+}
+
+[data-theme="light-clean"] .hover\:bg-slate-800:hover,
+[data-theme="light-clean"] .hover\:bg-slate-700:hover,
+[data-theme="light-clean"] [class*="hover:bg-slate-800"]:hover,
+[data-theme="light-clean"] [class*="hover:bg-slate-700"]:hover {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Text & Contrast */
+[data-theme="light-clean"] .text-white,
+[data-theme="light-clean"] .text-slate-100,
+[data-theme="light-clean"] .text-slate-200 {
+  color: #0f172a !important;
+}
+
+[data-theme="light-clean"] .text-slate-300 {
+  color: #334155 !important;
+}
+
+[data-theme="light-clean"] .text-slate-400 {
+  color: #64748b !important;
+}
+
+[data-theme="light-clean"] .text-slate-500 {
+  color: #64748b !important;
+}
+
+/* Typing Area characters in Light Mode */
+[data-theme="light-clean"] .typing-char-pending {
+  color: #94a3b8 !important;
+}
+
+[data-theme="light-clean"] .typing-char-correct {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+}
+
+[data-theme="light-clean"] .typing-char-incorrect {
+  color: #dc2626 !important;
+  background-color: #fee2e2 !important;
+}
+
+/* Virtual Keyboard in Light Mode */
+[data-theme="light-clean"] .keyboard-tray {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+[data-theme="light-clean"] .keycap-default {
+  background-color: #ffffff !important;
+  color: #1e293b !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light-clean"] .keycap-default:hover {
+  border-color: #0284c7 !important;
+}
+
+/* Accent overrides for readable high-contrast Light Mode */
+[data-theme="light-clean"] .text-cyan-400,
+[data-theme="light-clean"] .text-cyan-300 {
+  color: #0284c7 !important;
+}
+
+[data-theme="light-clean"] .bg-cyan-500 {
+  background-color: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="light-clean"] .border-cyan-400,
+[data-theme="light-clean"] .border-cyan-500 {
+  border-color: #0284c7 !important;
+}
+
+/* Modal overlay in Light Mode */
+[data-theme="light-clean"] .backdrop-blur-sm,
+[data-theme="light-clean"] .backdrop-blur-xs {
+  background-color: rgba(15, 23, 42, 0.45) !important;
+}
+
+/* Terminal Theme */
+[data-theme="terminal"] .text-cyan-400,
+[data-theme="terminal"] .text-cyan-300 {
+  color: #4ade80 !important;
+}
+[data-theme="terminal"] .bg-cyan-500 {
+  background-color: #22c55e !important;
+}
+[data-theme="terminal"] .border-cyan-400,
+[data-theme="terminal"] .border-cyan-500 {
+  border-color: #22c55e !important;
+}

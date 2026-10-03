@@ -1,0 +1,114 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with touch-typing statistics and milestones",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Unique Firebase Auth user ID"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User's display name or Google name"
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address"
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "URL to user's profile avatar"
+        },
+        "totalTestsCompleted": {
+          "type": "number",
+          "description": "Total number of completed typing sessions"
+        },
+        "bestWpm": {
+          "type": "number",
+          "description": "Highest recorded net WPM"
+        },
+        "averageWpm": {
+          "type": "number",
+          "description": "Average net WPM across all tests"
+        },
+        "averageAccuracy": {
+          "type": "number",
+          "description": "Average typing accuracy percentage"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of account registration"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last test update"
+        }
+      },
+      "required": ["userId", "email"]
+    },
+    "TypingRecord": {
+      "title": "TypingRecord",
+      "description": "Completed typing session result and metrics",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Record identifier"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner user ID"
+        },
+        "lessonId": {
+          "type": "string",
+          "description": "ID of lesson or practice mode"
+        },
+        "lessonTitle": {
+          "type": "string",
+          "description": "Title of the completed lesson or sprint"
+        },
+        "category": {
+          "type": "string",
+          "description": "Category: time, words, quotes, code, beginner, custom"
+        },
+        "netWpm": {
+          "type": "number",
+          "description": "Net words per minute"
+        },
+        "rawWpm": {
+          "type": "number",
+          "description": "Gross words per minute"
+        },
+        "accuracy": {
+          "type": "number",
+          "description": "Accuracy percentage (0 - 100)"
+        },
+        "cpm": {
+          "type": "number",
+          "description": "Characters per minute"
+        },
+        "elapsedSeconds": {
+          "type": "number",
+          "description": "Session time in seconds"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "ISO timestamp when completed"
+        }
+      },
+      "required": ["id", "userId", "netWpm", "accuracy", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Public and private profile stats of the user"
+    },
+    "/users/{userId}/records/{recordId}": {
+      "schema": "TypingRecord",
+      "description": "Historical typing speed test records for the authenticated user"
+    }
+  }
+}

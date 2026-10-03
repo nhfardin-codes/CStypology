@@ -1,0 +1,6 @@
+{
+  "name": "CStypology - Pro Typing Practice",
+  "description": "CStypology: Master touch typing with ultra-smooth animated carets, clicky mechanical keyboard sounds, real-time WPM metrics, and interactive lessons.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
