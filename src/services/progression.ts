@@ -1,15 +1,19 @@
 import { Lesson, TypingStats, LessonProgress } from '../types';
-import { BUILT_IN_LESSONS } from './lessons';
 import { db } from './firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 const PROGRESS_STORAGE_KEY = 'cstypology_lesson_progression_v1';
+export const MINIMUM_PASSING_WPM = 35;
 
-export function calculateStars(stats: TypingStats, targetWpm = 30): number {
-  if (stats.accuracy >= 96 && stats.netWpm >= targetWpm) {
+export function calculateStars(stats: TypingStats, targetWpm = 35): number {
+  if (stats.netWpm < MINIMUM_PASSING_WPM) {
+    return 0; // Below 35 WPM = retry required, no stars
+  }
+  const benchmark = Math.max(MINIMUM_PASSING_WPM, targetWpm);
+  if (stats.accuracy >= 95 && stats.netWpm >= benchmark) {
     return 3;
   }
-  if (stats.accuracy >= 90 && stats.netWpm >= Math.max(15, targetWpm * 0.75)) {
+  if (stats.accuracy >= 90 && stats.netWpm >= Math.max(MINIMUM_PASSING_WPM, benchmark * 0.85)) {
     return 2;
   }
   return 1;
@@ -96,9 +100,13 @@ export function updateLessonCompletion(
   starsEarned: number;
   nextLesson: Lesson | null;
   isNewlyUnlocked: boolean;
+  passed: boolean;
+  minimumRequiredWpm: number;
 } {
-  const targetWpm = currentLesson.targetWpm || 30;
-  const starsEarned = calculateStars(stats, targetWpm);
+  const targetWpm = currentLesson.targetWpm || MINIMUM_PASSING_WPM;
+  const passed = stats.netWpm >= MINIMUM_PASSING_WPM;
+  const starsEarned = passed ? calculateStars(stats, targetWpm) : 0;
+
   const currentRecord = currentProgression[currentLesson.id] || {
     lessonId: currentLesson.id,
     completed: false,
@@ -108,14 +116,15 @@ export function updateLessonCompletion(
     unlocked: true,
   };
 
+  // If passed (>= 35 WPM), record completion and unlock next stage
   const updatedCurrent: LessonProgress = {
     ...currentRecord,
-    completed: true,
+    completed: currentRecord.completed || passed,
     unlocked: true,
     bestWpm: Math.max(currentRecord.bestWpm, stats.netWpm),
     bestAccuracy: Math.max(currentRecord.bestAccuracy, stats.accuracy),
     stars: Math.max(currentRecord.stars, starsEarned),
-    completedAt: new Date().toISOString(),
+    completedAt: passed ? new Date().toISOString() : currentRecord.completedAt,
   };
 
   const updated: Record<string, LessonProgress> = {
@@ -123,12 +132,12 @@ export function updateLessonCompletion(
     [currentLesson.id]: updatedCurrent,
   };
 
-  // Find next lesson to unlock
+  // Find next lesson to unlock ONLY if passed
   const currentIndex = allLessons.findIndex((l) => l.id === currentLesson.id);
   let nextLesson: Lesson | null = null;
   let isNewlyUnlocked = false;
 
-  if (currentIndex !== -1 && currentIndex < allLessons.length - 1) {
+  if (passed && currentIndex !== -1 && currentIndex < allLessons.length - 1) {
     nextLesson = allLessons[currentIndex + 1];
     const nextRecord = updated[nextLesson.id] || {
       lessonId: nextLesson.id,
@@ -162,5 +171,7 @@ export function updateLessonCompletion(
     starsEarned,
     nextLesson,
     isNewlyUnlocked,
+    passed,
+    minimumRequiredWpm: MINIMUM_PASSING_WPM,
   };
 }

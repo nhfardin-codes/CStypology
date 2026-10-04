@@ -52,8 +52,18 @@ export const PRACTICE_QUOTES = [
 export const PRACTICE_CODE = [
   {
     title: 'JavaScript Async Fetcher',
-    lang: 'js',
+    lang: 'javascript',
     text: 'async function fetchTypingMetrics(userId) {\n  const res = await fetch(`/api/stats/${userId}`);\n  const data = await res.json();\n  return data.filter(item => item.accuracy >= 95);\n}',
+  },
+  {
+    title: 'TypeScript Generic Filter',
+    lang: 'typescript',
+    text: 'interface TypistRecord<T> {\n  id: string;\n  metric: T;\n  recordedAt: Date;\n}\nconst filterValid = <T>(items: TypistRecord<T>[]): TypistRecord<T>[] => {\n  return items.filter((item) => Boolean(item.metric));\n};',
+  },
+  {
+    title: 'React Custom Hook',
+    lang: 'javascript',
+    text: 'function useLocalStorage<T>(key: string, initialValue: T) {\n  const [stored, setStored] = useState<T>(() => {\n    const item = localStorage.getItem(key);\n    return item ? JSON.parse(item) : initialValue;\n  });\n  return [stored, setStored] as const;\n}',
   },
   {
     title: 'Python List Comprehension & Filter',
@@ -61,9 +71,19 @@ export const PRACTICE_CODE = [
     text: 'def calculate_speed_percentile(speeds: list[int], target: int) -> float:\n    valid = [s for s in speeds if s > 0]\n    below = len([s for s in valid if s < target])\n    return round((below / len(valid)) * 100, 2)',
   },
   {
+    title: 'Python Dataclass & Validator',
+    lang: 'python',
+    text: 'from dataclasses import dataclass\n\n@dataclass(frozen=True)\nclass TypingSprint:\n    wpm: int\n    accuracy: float\n    duration: int\n\n    def is_passed(self, threshold: int = 35) -> bool:\n        return self.wpm >= threshold and self.accuracy >= 90.0',
+  },
+  {
     title: 'HTML & Tailwind Modern Button',
     lang: 'html',
     text: '<button class="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold transition-all shadow-md active:scale-95">\n  Start Speed Drill\n</button>',
+  },
+  {
+    title: 'CSS Keyframe Caret Pulse',
+    lang: 'html',
+    text: '@keyframes caretPulse {\n  0%, 100% { opacity: 1; transform: scaleY(1); }\n  50% { opacity: 0.3; transform: scaleY(0.85); }\n}\n.caret-active {\n  animation: caretPulse 0.9s ease-in-out infinite;\n}',
   },
   {
     title: 'SQL Analytics Query',
@@ -71,9 +91,24 @@ export const PRACTICE_CODE = [
     text: 'SELECT user_id, AVG(net_wpm) AS average_speed, MAX(accuracy) AS best_accuracy\nFROM typing_sessions\nWHERE created_at >= NOW() - INTERVAL "30 days"\nGROUP BY user_id\nHAVING COUNT(*) >= 5\nORDER BY average_speed DESC;',
   },
   {
+    title: 'Rust Safe Pattern Matching',
+    lang: 'rust',
+    text: 'enum ResultStatus {\n    Pass(u32),\n    RetryRequired { current: u32, target: u32 },\n}\nfn evaluate(speed: u32) -> ResultStatus {\n    if speed >= 35 { ResultStatus::Pass(speed) } else { ResultStatus::RetryRequired { current: speed, target: 35 } }\n}',
+  },
+  {
+    title: 'Go HTTP Endpoint Handler',
+    lang: 'go',
+    text: 'func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {\n    w.Header().Set("Content-Type", "application/json")\n    w.WriteHeader(http.StatusOK)\n    json.NewEncoder(w).Encode(map[string]string{"status": "ready"})\n}',
+  },
+  {
     title: 'C++ Fast Math Algorithm',
     lang: 'cpp',
     text: 'template <typename T>\nT clampValue(T val, T minVal, T maxVal) {\n    if (val < minVal) return minVal;\n    if (val > maxVal) return maxVal;\n    return val;\n}',
+  },
+  {
+    title: 'Algorithms: Quick Sort Partition',
+    lang: 'javascript',
+    text: 'function partition(arr: number[], low: number, high: number): number {\n  const pivot = arr[high];\n  let i = low - 1;\n  for (let j = low; j < high; j++) {\n    if (arr[j] <= pivot) {\n      i++;\n      [arr[i], arr[j]] = [arr[j], arr[i]];\n    }\n  }\n  [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];\n  return i + 1;\n}',
   },
 ];
 

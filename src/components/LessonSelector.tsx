@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
-import { X, BookOpen, Sparkles, Code2, Quote, Zap, Trash2, Lock, CheckCircle2, Star, Trophy } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import {
+  X,
+  Search,
+  Lock,
+  Check,
+  Star,
+  Trash2,
+} from 'lucide-react';
 import { Lesson, LessonProgress } from '../types';
 
 interface LessonSelectorProps {
@@ -20,109 +27,108 @@ export const LessonSelector: React.FC<LessonSelectorProps> = ({
   onClose,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const categories = [
-    { id: 'all', label: 'All Levels', icon: BookOpen },
-    { id: 'beginner', label: 'Beginner & Rows', icon: Sparkles },
-    { id: 'words', label: 'Common Words', icon: Zap },
-    { id: 'quotes', label: 'Famous Quotes', icon: Quote },
-    { id: 'code', label: 'Code Syntax', icon: Code2 },
-    { id: 'custom', label: 'Custom Lessons', icon: BookOpen },
+    { id: 'all', label: 'all' },
+    { id: 'beginner', label: 'foundations' },
+    { id: 'words', label: 'words' },
+    { id: 'code', label: 'code' },
+    { id: 'quotes', label: 'quotes' },
+    { id: 'speed', label: 'speed' },
+    { id: 'custom', label: 'custom' },
   ];
 
-  const filteredLessons = lessons.filter((l) =>
-    selectedCategory === 'all' ? true : l.category === selectedCategory
-  );
-
-  // Overall progression stats
   const totalStages = lessons.length;
   const completedStages = Object.values(progression).filter((p) => p.completed).length;
   const totalStars = Object.values(progression).reduce((acc, p) => acc + (p.stars || 0), 0);
   const maxPossibleStars = totalStages * 3;
-  const progressPercent = Math.round((completedStages / Math.max(1, totalStages)) * 100);
 
-  const getDifficultyBadge = (diff: 'Easy' | 'Medium' | 'Hard') => {
-    switch (diff) {
-      case 'Easy':
-        return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
-      case 'Medium':
-        return 'text-amber-400 bg-amber-500/10 border-amber-500/30';
-      case 'Hard':
-        return 'text-rose-400 bg-rose-500/10 border-rose-500/30';
-    }
-  };
+  const filteredLessons = useMemo(() => {
+    return lessons.filter((l) => {
+      const matchCat = selectedCategory === 'all' ? true : l.category === selectedCategory;
+      const matchSearch = searchQuery.trim() === ''
+        ? true
+        : l.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          l.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (l.language && l.language.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchCat && matchSearch;
+    });
+  }, [lessons, selectedCategory, searchQuery]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="w-full max-w-3xl max-h-[88vh] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-800">
-          <div className="flex items-center gap-2.5">
-            <Trophy className="w-5 h-5 text-cyan-400" />
-            <div>
-              <h2 className="text-lg font-bold text-white">Lesson Progression Campaign</h2>
-              <p className="text-xs text-slate-400">Clear each level in sequence to unlock higher tiers</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Campaign Stats Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-3 bg-slate-950/60 border-b border-slate-800 text-xs">
-          <div className="flex items-center gap-4">
-            <span className="text-slate-300 font-medium">
-              Stages Cleared: <strong className="text-cyan-400">{completedStages}</strong> / {totalStages}
+    <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 font-mono text-xs select-none">
+      <div className="w-full max-w-3xl max-h-[85vh] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        {/* Minimal Header */}
+        <div className="flex items-center justify-between p-4 px-5 border-b border-slate-800/80 bg-slate-950/50">
+          <div className="flex items-center gap-3">
+            <span className="font-bold text-white tracking-wider lowercase">curriculum</span>
+            <span className="text-slate-400">·</span>
+            <span className="text-slate-400">
+              <strong className="text-cyan-400 font-normal">{completedStages}</strong>/{totalStages} cleared
             </span>
-            <span className="flex items-center gap-1 text-amber-400 font-semibold font-mono">
-              <Star className="w-3.5 h-3.5 fill-amber-400" />
-              <span>{totalStars}</span>
-              <span className="text-slate-500">/ {maxPossibleStars}</span>
+            <span className="text-slate-400">·</span>
+            <span className="text-amber-400 flex items-center gap-1 font-normal">
+              <Star className="w-3 h-3 fill-amber-400" />
+              <span>{totalStars}/{maxPossibleStars}</span>
             </span>
+            <span className="hidden sm:inline text-slate-400">·</span>
+            <span className="hidden sm:inline text-slate-400 text-[11px]">&gt;=35 wpm gate</span>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-44">
-            <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-cyan-500 to-emerald-400 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${progressPercent}%` }}
+          <div className="flex items-center gap-3">
+            {/* Minimal Filter Input */}
+            <div className="flex items-center gap-1 border-b border-slate-700/80 focus-within:border-cyan-400 px-1 py-0.5">
+              <Search className="w-3 h-3 text-slate-500" />
+              <input
+                type="text"
+                placeholder="filter..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-transparent text-slate-200 placeholder-slate-600 outline-none w-24 sm:w-32 text-xs font-mono"
               />
             </div>
-            <span className="text-[11px] font-mono text-slate-400">{progressPercent}%</span>
+
+            <button
+              onClick={onClose}
+              className="p-1 rounded-md text-slate-400 hover:text-white transition-colors cursor-pointer"
+              title="Close (Esc)"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
-        {/* Category Tabs */}
-        <div className="flex items-center gap-1.5 px-5 py-2.5 border-b border-slate-800 overflow-x-auto bg-slate-950/40">
+        {/* Minimal Category Tabs */}
+        <div className="flex items-center gap-4 px-5 py-2.5 border-b border-slate-800/60 bg-slate-950/20 overflow-x-auto scrollbar-none text-xs">
           {categories.map((cat) => {
-            const Icon = cat.icon;
             const active = selectedCategory === cat.id;
+            const count = cat.id === 'all'
+              ? lessons.length
+              : lessons.filter((l) => l.category === cat.id).length;
+
             return (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                className={`transition-colors whitespace-nowrap cursor-pointer lowercase ${
                   active
-                    ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                    ? 'text-cyan-400 font-bold border-b border-cyan-400 pb-0.5'
+                    : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <Icon className="w-3.5 h-3.5" />
                 <span>{cat.label}</span>
+                <span className="text-slate-400 ml-1 text-[10px]">({count})</span>
               </button>
             );
           })}
         </div>
 
-        {/* Lesson Cards List */}
-        <div className="p-5 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Minimal Cards List */}
+        <div className="p-4 sm:p-5 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-2.5">
           {filteredLessons.length === 0 ? (
-            <div className="col-span-2 py-12 text-center text-slate-500 text-sm">
-              No lessons found in this category yet.
+            <div className="col-span-2 py-12 text-center text-slate-500 text-xs">
+              no lessons match query
             </div>
           ) : (
             filteredLessons.map((lesson, idx) => {
@@ -130,7 +136,6 @@ export const LessonSelector: React.FC<LessonSelectorProps> = ({
               const lessonIdx = lessons.findIndex((l) => l.id === lesson.id);
               const stageNum = lessonIdx !== -1 ? lessonIdx + 1 : idx + 1;
 
-              // Check if unlocked (first level is always unlocked)
               const prog = progression[lesson.id];
               const isUnlocked = prog?.unlocked ?? (lessonIdx === 0 || lesson.category === 'custom');
               const isCompleted = prog?.completed ?? false;
@@ -145,106 +150,84 @@ export const LessonSelector: React.FC<LessonSelectorProps> = ({
                       onClose();
                     }
                   }}
-                  className={`p-4 rounded-xl border flex flex-col justify-between gap-3 text-left transition-all relative ${
+                  className={`p-3 rounded-xl border transition-all text-left flex flex-col justify-between gap-1.5 ${
                     !isUnlocked
-                      ? 'bg-slate-950/40 border-slate-800/60 opacity-60 cursor-not-allowed'
+                      ? 'border-slate-800/40 bg-slate-950/20 opacity-40 cursor-not-allowed'
                       : isCurrent
-                      ? 'bg-cyan-500/15 border-cyan-400 ring-2 ring-cyan-500/30 cursor-pointer'
+                      ? 'border-cyan-400 bg-cyan-500/10 cursor-pointer shadow-xs'
                       : isCompleted
-                      ? 'bg-emerald-500/5 border-emerald-500/30 hover:border-emerald-500/50 hover:bg-emerald-500/10 cursor-pointer'
-                      : 'bg-slate-800/40 border-slate-800 hover:border-slate-700 hover:bg-slate-800/80 cursor-pointer'
+                      ? 'border-slate-800 bg-slate-950/40 hover:border-slate-700 hover:bg-slate-900 cursor-pointer'
+                      : 'border-slate-800/80 bg-slate-950/30 hover:border-slate-700 hover:bg-slate-900 cursor-pointer'
                   }`}
                 >
-                  <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 truncate">
-                        <span className="text-[11px] font-mono font-bold text-cyan-400 px-1.5 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
-                          Stage {stageNum}
-                        </span>
-                        <h3 className="text-sm font-bold text-white tracking-tight truncate">
-                          {lesson.title}
-                        </h3>
-                      </div>
+                  {/* Top Line: Stage Index, Title, Status */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="text-[11px] text-slate-400 font-mono">
+                        {String(stageNum).padStart(2, '0')}
+                      </span>
+                      <span className={`font-medium truncate ${isCurrent ? 'text-cyan-300 font-bold' : 'text-slate-200'}`}>
+                        {lesson.title}
+                      </span>
+                    </div>
 
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        {!isUnlocked ? (
-                          <span className="p-1 rounded bg-slate-800 text-slate-500">
-                            <Lock className="w-3.5 h-3.5" />
-                          </span>
-                        ) : isCompleted ? (
-                          <div className="flex items-center gap-0.5">
+                    <div className="flex items-center gap-1.5 shrink-0 text-[11px]">
+                      {!isUnlocked ? (
+                        <span className="text-slate-400 flex items-center gap-1">
+                          <Lock className="w-3 h-3" />
+                        </span>
+                      ) : isCompleted ? (
+                        <div className="flex items-center gap-1 text-emerald-400 font-mono">
+                          <Check className="w-3 h-3" />
+                          <span>{prog?.bestWpm} wpm</span>
+                          <span className="text-amber-400 flex items-center ml-0.5">
                             {[1, 2, 3].map((s) => (
                               <Star
                                 key={s}
-                                className={`w-3.5 h-3.5 ${
-                                  s <= stars
-                                    ? 'text-amber-400 fill-amber-400'
-                                    : 'text-slate-700 fill-slate-800'
+                                className={`w-2.5 h-2.5 ${
+                                  s <= stars ? 'fill-amber-400 text-amber-400' : 'text-slate-700 fill-slate-800'
                                 }`}
                               />
                             ))}
-                          </div>
-                        ) : null}
-
-                        <span
-                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border ${getDifficultyBadge(
-                            lesson.difficulty
-                          )}`}
-                        >
-                          {lesson.difficulty}
-                        </span>
-                      </div>
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400">target 35+</span>
+                      )}
                     </div>
-
-                    <p className="text-xs text-slate-400 line-clamp-2">{lesson.description}</p>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-800/60 text-xs">
+                  {/* Clean text snippet without heavy nested box */}
+                  <p className="text-[11px] text-slate-400 font-mono truncate leading-normal">
+                    {lesson.text.slice(0, 65)}...
+                  </p>
+
+                  {/* Bottom Line: Category/Diff & Actions */}
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-800/40 text-[10px] text-slate-400">
                     <div className="flex items-center gap-2">
-                      {isCompleted && prog ? (
-                        <span className="text-[11px] text-emerald-400 font-mono font-medium flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" />
-                          <span>Best: {prog.bestWpm} WPM ({prog.bestAccuracy}%)</span>
-                        </span>
-                      ) : (
-                        <span className="text-[11px] text-slate-400 font-mono">
-                          {lesson.targetWpm ? `Target: ${lesson.targetWpm} WPM` : `${lesson.text.length} chars`}
-                        </span>
+                      <span className="capitalize">{lesson.difficulty.toLowerCase()}</span>
+                      <span>·</span>
+                      <span>{lesson.category}</span>
+                      {lesson.language && (
+                        <>
+                          <span>·</span>
+                          <span className="text-cyan-400/80">{lesson.language}</span>
+                        </>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      {lesson.category === 'custom' && onDeleteCustomLesson && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteCustomLesson(lesson.id);
-                          }}
-                          className="p-1 rounded text-rose-400 hover:bg-rose-500/20 transition-colors"
-                          title="Delete custom lesson"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-
-                      {!isUnlocked ? (
-                        <span className="text-[10px] text-slate-500 font-mono flex items-center gap-1">
-                          <Lock className="w-3 h-3" /> Locked
-                        </span>
-                      ) : isCurrent ? (
-                        <span className="text-[11px] font-bold text-cyan-400 font-mono">
-                          ● Current
-                        </span>
-                      ) : isCompleted ? (
-                        <span className="text-[11px] font-medium text-emerald-400 hover:underline">
-                          Replay
-                        </span>
-                      ) : (
-                        <span className="text-[11px] font-medium text-cyan-400 hover:underline">
-                          Play Stage
-                        </span>
-                      )}
-                    </div>
+                    {lesson.category === 'custom' && onDeleteCustomLesson && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteCustomLesson(lesson.id);
+                        }}
+                        className="text-slate-400 hover:text-rose-400 p-0.5 transition-colors cursor-pointer"
+                        title="delete custom lesson"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    )}
                   </div>
                 </div>
               );

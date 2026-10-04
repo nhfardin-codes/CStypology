@@ -55,6 +55,39 @@
     --accent: #e5a458;
     --accent-glow: rgba(229, 164, 88, 0.35);
   }
+
+  [data-theme="dracula"] {
+    --bg-main: #21222c;
+    --card-bg: rgba(40, 42, 54, 0.9);
+    --card-border: #6272a4;
+    --text-primary: #f8f8f2;
+    --text-muted: #bd93f9;
+    --text-pending: #6272a4;
+    --accent: #bd93f9;
+    --accent-glow: rgba(189, 147, 249, 0.4);
+  }
+
+  [data-theme="nord"] {
+    --bg-main: #242933;
+    --card-bg: rgba(46, 52, 64, 0.9);
+    --card-border: #4c566a;
+    --text-primary: #eceff4;
+    --text-muted: #88c0d0;
+    --text-pending: #4c566a;
+    --accent: #88c0d0;
+    --accent-glow: rgba(136, 192, 208, 0.35);
+  }
+
+  [data-theme="monokai"] {
+    --bg-main: #1e1f1c;
+    --card-bg: rgba(39, 40, 34, 0.9);
+    --card-border: #75715e;
+    --text-primary: #f8f8f2;
+    --text-muted: #a6e22e;
+    --text-pending: #75715e;
+    --accent: #a6e22e;
+    --accent-glow: rgba(166, 226, 46, 0.4);
+  }
 }
 
 /* Custom scrollbars */
@@ -76,6 +109,81 @@
   background: rgba(148, 163, 184, 0.4);
 }
 
+/* Font Families */
+[data-font="mono"] {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+[data-font="jetbrains"] {
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+}
+[data-font="fira"] {
+  font-family: "Fira Code", monospace;
+}
+[data-font="sans"] {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Custom Accent Colors */
+[data-accent="emerald"] .text-cyan-400,
+[data-accent="emerald"] .text-cyan-300 {
+  color: #10b981 !important;
+}
+[data-accent="emerald"] .bg-cyan-500 {
+  background-color: #10b981 !important;
+}
+[data-accent="emerald"] .border-cyan-400,
+[data-accent="emerald"] .border-cyan-500 {
+  border-color: #10b981 !important;
+}
+
+[data-accent="amber"] .text-cyan-400,
+[data-accent="amber"] .text-cyan-300 {
+  color: #f59e0b !important;
+}
+[data-accent="amber"] .bg-cyan-500 {
+  background-color: #f59e0b !important;
+}
+[data-accent="amber"] .border-cyan-400,
+[data-accent="amber"] .border-cyan-500 {
+  border-color: #f59e0b !important;
+}
+
+[data-accent="violet"] .text-cyan-400,
+[data-accent="violet"] .text-cyan-300 {
+  color: #a855f7 !important;
+}
+[data-accent="violet"] .bg-cyan-500 {
+  background-color: #a855f7 !important;
+}
+[data-accent="violet"] .border-cyan-400,
+[data-accent="violet"] .border-cyan-500 {
+  border-color: #a855f7 !important;
+}
+
+[data-accent="rose"] .text-cyan-400,
+[data-accent="rose"] .text-cyan-300 {
+  color: #f43f5e !important;
+}
+[data-accent="rose"] .bg-cyan-500 {
+  background-color: #f43f5e !important;
+}
+[data-accent="rose"] .border-cyan-400,
+[data-accent="rose"] .border-cyan-500 {
+  border-color: #f43f5e !important;
+}
+
+[data-accent="sky"] .text-cyan-400,
+[data-accent="sky"] .text-cyan-300 {
+  color: #0284c7 !important;
+}
+[data-accent="sky"] .bg-cyan-500 {
+  background-color: #0284c7 !important;
+}
+[data-accent="sky"] .border-cyan-400,
+[data-accent="sky"] .border-cyan-500 {
+  border-color: #0284c7 !important;
+}
+
 /* ==========================================================================
    Light Clean Theme Polishing
    ========================================================================== */
@@ -84,7 +192,6 @@
   color: #0f172a !important;
 }
 
-/* Surfaces and Cards */
 [data-theme="light-clean"] .bg-slate-900,
 [data-theme="light-clean"] .bg-slate-950,
 [data-theme="light-clean"] [class*="bg-slate-900"],
@@ -93,7 +200,6 @@
   color: #0f172a !important;
 }
 
-/* Crisp Light Borders */
 [data-theme="light-clean"] .border-slate-800,
 [data-theme="light-clean"] .border-slate-700,
 [data-theme="light-clean"] [class*="border-slate-800"],
@@ -101,7 +207,6 @@
   border-color: #e2e8f0 !important;
 }
 
-/* Buttons and secondary tiles */
 [data-theme="light-clean"] .bg-slate-800,
 [data-theme="light-clean"] [class*="bg-slate-800"] {
   background-color: #f1f5f9 !important;
@@ -109,15 +214,6 @@
   border-color: #cbd5e1 !important;
 }
 
-[data-theme="light-clean"] .hover\:bg-slate-800:hover,
-[data-theme="light-clean"] .hover\:bg-slate-700:hover,
-[data-theme="light-clean"] [class*="hover:bg-slate-800"]:hover,
-[data-theme="light-clean"] [class*="hover:bg-slate-700"]:hover {
-  background-color: #e2e8f0 !important;
-  color: #0f172a !important;
-}
-
-/* Text & Contrast */
 [data-theme="light-clean"] .text-white,
 [data-theme="light-clean"] .text-slate-100,
 [data-theme="light-clean"] .text-slate-200 {
@@ -168,7 +264,6 @@
   border-color: #0284c7 !important;
 }
 
-/* Accent overrides for readable high-contrast Light Mode */
 [data-theme="light-clean"] .text-cyan-400,
 [data-theme="light-clean"] .text-cyan-300 {
   color: #0284c7 !important;
@@ -184,7 +279,6 @@
   border-color: #0284c7 !important;
 }
 
-/* Modal overlay in Light Mode */
 [data-theme="light-clean"] .backdrop-blur-sm,
 [data-theme="light-clean"] .backdrop-blur-xs {
   background-color: rgba(15, 23, 42, 0.45) !important;

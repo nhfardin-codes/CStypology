@@ -84,7 +84,7 @@ export const StatsBar: React.FC<StatsBarProps> = ({
           <button
             onClick={onRestart}
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors cursor-pointer"
-            title="Restart (Tab + Enter)"
+            title="Restart (Tab)"
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>

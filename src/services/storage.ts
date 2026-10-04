@@ -14,6 +14,8 @@ export const DEFAULT_SETTINGS: UserSettings = {
   errorSoundEnabled: true,
   errorSoundVolume: 0.6,
   theme: 'slate-dark',
+  accentColor: 'cyan',
+  fontFamily: 'mono',
   backspaceMode: 'free',
   showKeyboard: true,
   showHandsGuide: false,

@@ -10,6 +10,7 @@ import {
   Star,
   Sparkles,
   Unlock,
+  AlertCircle,
 } from 'lucide-react';
 import { User } from 'firebase/auth';
 import { TypingStats, Lesson } from '../types';
@@ -24,6 +25,7 @@ interface ResultsModalProps {
   starsEarned?: number;
   nextLessonTitle?: string;
   isNewlyUnlocked?: boolean;
+  passed?: boolean;
   onRestart: () => void;
   onNextLesson: () => void;
   hasNextLesson: boolean;
@@ -40,23 +42,40 @@ export const ResultsModal: React.FC<ResultsModalProps> = ({
   starsEarned = 3,
   nextLessonTitle,
   isNewlyUnlocked,
+  passed,
   onRestart,
   onNextLesson,
   hasNextLesson,
   onOpenAuth,
   onClose,
 }) => {
-  // Play triumphant level-up fanfare on mount
+  // If in lesson mode and speed is below 35 WPM, level is not cleared
+  const isSpeedPassed = passed ?? (stats.netWpm >= 35);
+
   useEffect(() => {
-    soundEngine.playLevelUpFanfare();
-  }, []);
+    if (isLessonMode && !isSpeedPassed) {
+      soundEngine.playErrorSound();
+    } else {
+      soundEngine.playLevelUpFanfare();
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        onRestart();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLessonMode, isSpeedPassed, onRestart]);
 
   const getSpeedRank = (wpm: number) => {
     if (wpm >= 100) return { title: 'Godspeed Virtuoso', desc: 'Top tier competitive speed!' };
     if (wpm >= 80) return { title: 'Keyboard Master', desc: 'Incredible cadence and accuracy!' };
     if (wpm >= 60) return { title: 'Fast Professional', desc: 'Well above average touch-typing speed!' };
     if (wpm >= 40) return { title: 'Steady Touch Typer', desc: 'Solid foundation and steady rhythm.' };
-    return { title: 'Developing Rhythm', desc: 'Keep practicing daily to build muscle memory!' };
+    if (wpm >= 35) return { title: 'Proficient Typer', desc: 'Cleared the 35 WPM target benchmark!' };
+    return { title: 'Developing Rhythm', desc: 'Keep practicing daily to reach the 35 WPM target!' };
   };
 
   const rank = getSpeedRank(stats.netWpm);
@@ -67,40 +86,61 @@ export const ResultsModal: React.FC<ResultsModalProps> = ({
       <div className="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl flex flex-col gap-5 animate-in fade-in zoom-in-95 duration-200">
         {/* Game Progression Banner */}
         {isLessonMode && (
-          <div className="flex items-center justify-between p-3.5 rounded-xl bg-gradient-to-r from-cyan-500/20 via-teal-500/15 to-emerald-500/20 border border-cyan-500/40 shadow-lg">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-lg bg-cyan-500 text-slate-950 font-black flex items-center justify-center shadow-md">
-                <Sparkles className="w-5 h-5 fill-slate-950" />
+          isSpeedPassed ? (
+            <div className="flex items-center justify-between p-3.5 rounded-xl bg-gradient-to-r from-cyan-500/20 via-teal-500/15 to-emerald-500/20 border border-cyan-500/40 shadow-lg">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-lg bg-cyan-500 text-slate-950 font-black flex items-center justify-center shadow-md">
+                  <Sparkles className="w-5 h-5 fill-slate-950" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+                    <span>Stage Cleared!</span>
+                    {isNewlyUnlocked && (
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full font-mono font-bold flex items-center gap-1">
+                        <Unlock className="w-2.5 h-2.5" /> Next Level Unlocked
+                      </span>
+                    )}
+                  </h3>
+                  <p className="text-xs text-cyan-200/80">
+                    {hasNextLesson ? (nextLessonTitle ? `Up next: ${nextLessonTitle}` : 'Advancing to next stage') : 'All curriculum stages cleared!'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <span>Stage Cleared!</span>
-                  {isNewlyUnlocked && (
-                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full font-mono font-bold flex items-center gap-1">
-                      <Unlock className="w-2.5 h-2.5" /> Next Level Unlocked
-                    </span>
-                  )}
-                </h3>
-                <p className="text-xs text-cyan-200/80">
-                  {hasNextLesson ? `Moving forward to next stage` : 'All curriculum stages cleared!'}
-                </p>
-              </div>
-            </div>
 
-            {/* Earned Stars */}
-            <div className="flex items-center gap-1">
-              {[1, 2, 3].map((starIdx) => (
-                <Star
-                  key={starIdx}
-                  className={`w-6 h-6 transition-all duration-300 ${
-                    starIdx <= starsEarned
-                      ? 'text-amber-400 fill-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)] animate-bounce'
-                      : 'text-slate-700 fill-slate-800'
-                  }`}
-                />
-              ))}
+              {/* Earned Stars */}
+              <div className="flex items-center gap-1">
+                {[1, 2, 3].map((starIdx) => (
+                  <Star
+                    key={starIdx}
+                    className={`w-6 h-6 transition-all duration-300 ${
+                      starIdx <= starsEarned
+                        ? 'text-amber-400 fill-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)] animate-bounce'
+                        : 'text-slate-700 fill-slate-800'
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 shadow-lg">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center border border-amber-500/30 shrink-0">
+                  <AlertCircle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>Target 35 WPM Not Reached</span>
+                    <span className="text-[10px] bg-rose-500/20 text-rose-300 border border-rose-500/30 px-2 py-0.5 rounded-full font-mono font-bold">
+                      Retry Required
+                    </span>
+                  </h3>
+                  <p className="text-xs text-amber-200/80 mt-0.5">
+                    You typed at <strong className="text-white font-mono">{stats.netWpm} WPM</strong>. A minimum of 35 WPM is required to pass and unlock the next stage.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )
         )}
 
         {/* Top Award Header */}
@@ -119,28 +159,36 @@ export const ResultsModal: React.FC<ResultsModalProps> = ({
           </span>
         </div>
 
-        {/* Primary Metric Displays */}
+        {/* Primary Metric Score Cards */}
         <div className="grid grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 flex flex-col">
+          {/* Net WPM */}
+          <div className="flex flex-col p-4 rounded-xl bg-slate-950/60 border border-slate-800 relative overflow-hidden">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Net Speed
             </span>
-            <div className="flex items-baseline gap-1 mt-1">
-              <span className="text-5xl font-black font-mono text-cyan-400 tracking-tight">
+            <div className="flex items-baseline gap-1.5 mt-1">
+              <span className={`text-4xl sm:text-5xl font-black font-mono tracking-tight ${
+                isLessonMode && !isSpeedPassed ? 'text-amber-400' : 'text-cyan-400'
+              }`}>
                 {stats.netWpm}
               </span>
-              <span className="text-sm font-mono text-slate-400">WPM</span>
+              <span className="text-sm font-bold font-mono text-slate-400">WPM</span>
             </div>
-            <span className="text-xs text-slate-500 mt-1">Raw: {stats.rawWpm} WPM</span>
+            <div className="flex items-center gap-2 mt-2 text-[11px] text-slate-500 font-mono">
+              <span>Raw: {stats.rawWpm}</span>
+              <span>·</span>
+              <span>Target: 35 WPM</span>
+            </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60 flex flex-col">
+          {/* Accuracy */}
+          <div className="flex flex-col p-4 rounded-xl bg-slate-950/60 border border-slate-800">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Accuracy
             </span>
-            <div className="flex items-baseline gap-1 mt-1">
+            <div className="flex items-baseline gap-1.5 mt-1">
               <span
-                className={`text-5xl font-black font-mono tracking-tight ${
+                className={`text-4xl sm:text-5xl font-black font-mono tracking-tight ${
                   stats.accuracy >= 98
                     ? 'text-emerald-400'
                     : stats.accuracy >= 90
@@ -150,37 +198,14 @@ export const ResultsModal: React.FC<ResultsModalProps> = ({
               >
                 {stats.accuracy}
               </span>
-              <span className="text-sm font-mono text-slate-400">%</span>
+              <span className="text-sm font-bold font-mono text-slate-400">%</span>
             </div>
-            <span className="text-xs text-slate-500 mt-1">
-              {stats.incorrectChars === 0 ? 'Flawless run!' : `${stats.incorrectChars} mistakes`}
-            </span>
+            <div className="flex items-center gap-2 mt-2 text-[11px] text-slate-500 font-mono">
+              <span>Errors: {stats.incorrectChars}</span>
+              <span>·</span>
+              <span>Clean: {stats.correctChars}</span>
+            </div>
           </div>
-        </div>
-
-        {/* Cloud Progress Status Banner */}
-        <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-xs">
-          {user ? (
-            <div className="flex items-center gap-2 text-emerald-400">
-              <CheckCircle2 className="w-4 h-4" />
-              <span>
-                {isSavedToCloud
-                  ? 'Level progress & stats synced to Firestore'
-                  : 'Saving progression...'}
-              </span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between w-full">
-              <span className="text-slate-400">Saved locally (Manual practice)</span>
-              <button
-                onClick={onOpenAuth}
-                className="flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-semibold cursor-pointer"
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>Login with Gmail to sync all devices</span>
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Secondary Detailed Metrics */}
@@ -216,61 +241,58 @@ export const ResultsModal: React.FC<ResultsModalProps> = ({
           </div>
         </div>
 
-        {/* Problem Keys Analysis */}
-        {sortedErrors.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-1.5 text-xs text-slate-400">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-              <span className="font-medium">Keys to Practice:</span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {sortedErrors.slice(0, 6).map(([key, count]) => (
-                <div
-                  key={key}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-300 font-mono text-xs"
-                >
-                  <span className="font-bold">{key === ' ' ? 'Space' : key}</span>
-                  <span className="text-[10px] bg-rose-500/30 text-rose-200 px-1 rounded">
-                    ×{count}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-800">
           <div className="flex items-center gap-2 text-[11px] text-slate-500">
             <span className="font-semibold text-cyan-400">CStypology</span>
             <span>·</span>
-            <span>Speed Assessment</span>
+            <span>{isLessonMode && !isSpeedPassed ? 'Retry <35 WPM' : 'Speed Assessment'}</span>
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-            <button
-              onClick={onRestart}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition-colors border border-slate-700 cursor-pointer"
-            >
-              <RotateCcw className="w-4 h-4 text-cyan-400" />
-              <span>Retry</span>
-            </button>
-
-            {hasNextLesson ? (
-              <button
-                onClick={onNextLesson}
-                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-400 hover:from-cyan-400 hover:to-emerald-300 text-slate-950 text-sm font-black transition-all shadow-lg shadow-cyan-500/25 active:scale-95 cursor-pointer"
-              >
-                <span>{isLessonMode ? 'Next Level (Enter)' : 'Next (Enter)'}</span>
-                <ArrowRight className="w-4 h-4 stroke-[3]" />
-              </button>
+            {isLessonMode && !isSpeedPassed ? (
+              <>
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold transition-colors border border-slate-700 cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={onRestart}
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-sm font-black transition-all shadow-lg shadow-amber-500/25 active:scale-95 cursor-pointer"
+                >
+                  <RotateCcw className="w-4 h-4 stroke-[3]" />
+                  <span>Retry Level (Tab)</span>
+                </button>
+              </>
             ) : (
-              <button
-                onClick={onClose}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-sm font-bold transition-all cursor-pointer"
-              >
-                Done
-              </button>
+              <>
+                <button
+                  onClick={onRestart}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition-colors border border-slate-700 cursor-pointer"
+                >
+                  <RotateCcw className="w-4 h-4 text-cyan-400" />
+                  <span>Retry (Tab)</span>
+                </button>
+
+                {hasNextLesson ? (
+                  <button
+                    onClick={onNextLesson}
+                    className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-400 hover:from-cyan-400 hover:to-emerald-300 text-slate-950 text-sm font-black transition-all shadow-lg shadow-cyan-500/25 active:scale-95 cursor-pointer"
+                  >
+                    <span>{isLessonMode ? 'Next Level (Enter)' : 'Next (Enter)'}</span>
+                    <ArrowRight className="w-4 h-4 stroke-[3]" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={onClose}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-sm font-bold transition-all cursor-pointer"
+                  >
+                    Done
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>

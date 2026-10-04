@@ -121,6 +121,8 @@ export default function App() {
     stars: number;
     nextLesson: Lesson | null;
     isNewlyUnlocked: boolean;
+    passed: boolean;
+    minimumRequiredWpm: number;
   } | null>(null);
 
   // Snapshot of stats when paused so both Time and WPM freeze completely
@@ -214,6 +216,8 @@ export default function App() {
           stars: result.starsEarned,
           nextLesson: result.nextLesson,
           isNewlyUnlocked: result.isNewlyUnlocked,
+          passed: result.passed,
+          minimumRequiredWpm: result.minimumRequiredWpm,
         });
       }
 
@@ -505,24 +509,24 @@ export default function App() {
       }
 
       if (isCompleted) {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          setupLesson(currentLesson, targetSeconds);
+          return;
+        }
         if (e.key === 'Enter') {
           e.preventDefault();
           handleNextLesson();
+          return;
         }
         return;
       }
 
-      // Quick restart via Tab + Enter
+      // Quick restart via Tab alone (changed from Tab+Enter)
       if (e.key === 'Tab') {
-        // Tab + Enter quick restart
-        const handleTabRestart = (e2: KeyboardEvent) => {
-          if (e2.key === 'Enter') {
-            e2.preventDefault();
-            setupLesson(currentLesson, targetSeconds);
-          }
-          window.removeEventListener('keydown', handleTabRestart);
-        };
-        window.addEventListener('keydown', handleTabRestart, { once: true });
+        e.preventDefault();
+        setupLesson(currentLesson, targetSeconds);
+        return;
       }
 
       if (e.key === 'Escape') {
@@ -605,6 +609,12 @@ export default function App() {
         return 'bg-black text-emerald-400 scheme-dark font-mono';
       case 'sepia':
         return 'bg-[#2b241e] text-[#f4ecd8] scheme-dark';
+      case 'dracula':
+        return 'bg-[#21222c] text-[#f8f8f2] scheme-dark';
+      case 'nord':
+        return 'bg-[#242933] text-[#eceff4] scheme-dark';
+      case 'monokai':
+        return 'bg-[#1e1f1c] text-[#f8f8f2] scheme-dark';
       case 'slate-dark':
       default:
         return 'bg-slate-950 text-slate-100 scheme-dark';
@@ -614,6 +624,8 @@ export default function App() {
   return (
     <div
       data-theme={settings.theme}
+      data-accent={settings.accentColor || 'cyan'}
+      data-font={settings.fontFamily || 'mono'}
       className={`min-h-screen w-full flex flex-col items-center justify-between p-4 sm:p-6 transition-colors duration-200 ${getThemeClass()}`}
     >
       {/* Minimal Top Navbar */}
@@ -833,7 +845,7 @@ export default function App() {
           </span>
           <span className="hidden md:flex items-center gap-1.5">
             <kbd className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-slate-300">
-              Tab+Enter
+              Tab
             </kbd>
             <span>Restart</span>
           </span>
@@ -848,12 +860,16 @@ export default function App() {
           user={user}
           isSavedToCloud={isSavedToCloud}
           isLessonMode={activeTab === 'lessons'}
-          starsEarned={stageResult?.stars || 3}
+          starsEarned={stageResult?.stars ?? 0}
+          passed={stageResult ? stageResult.passed : currentStats.netWpm >= 35}
           nextLessonTitle={stageResult?.nextLesson?.title}
           isNewlyUnlocked={stageResult?.isNewlyUnlocked}
           onRestart={() => setupLesson(currentLesson, targetSeconds)}
           onNextLesson={handleNextLesson}
-          hasNextLesson={Boolean(stageResult?.nextLesson || hasNextLesson || activeTab === 'practice')}
+          hasNextLesson={Boolean(
+            activeTab === 'practice' ||
+            (stageResult ? stageResult.passed && Boolean(stageResult.nextLesson) : currentStats.netWpm >= 35 && hasNextLesson)
+          )}
           onOpenAuth={() => setShowProfileModal(true)}
           onClose={() => setIsCompleted(false)}
         />

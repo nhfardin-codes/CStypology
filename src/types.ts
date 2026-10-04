@@ -14,7 +14,19 @@ export type SoundTheme =
   | 'custom'
   | 'off';
 
-export type AppTheme = 'slate-dark' | 'light-clean' | 'cyberpunk' | 'terminal' | 'sepia';
+export type AppTheme =
+  | 'slate-dark'
+  | 'light-clean'
+  | 'cyberpunk'
+  | 'terminal'
+  | 'sepia'
+  | 'dracula'
+  | 'nord'
+  | 'monokai';
+
+export type AccentColor = 'cyan' | 'emerald' | 'amber' | 'violet' | 'rose' | 'sky';
+
+export type FontFamily = 'mono' | 'jetbrains' | 'fira' | 'sans';
 
 export type BackspaceMode = 'free' | 'strict';
 
@@ -24,6 +36,7 @@ export interface Lesson {
   id: string;
   title: string;
   category: 'beginner' | 'words' | 'quotes' | 'code' | 'speed' | 'custom';
+  language?: string; // for code exercises: js, ts, python, html, css, rust, go, sql, cpp
   description: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   text: string;
@@ -70,6 +83,8 @@ export interface UserSettings {
   errorSoundEnabled: boolean;
   errorSoundVolume: number; // 0 to 1
   theme: AppTheme;
+  accentColor: AccentColor;
+  fontFamily: FontFamily;
   backspaceMode: BackspaceMode;
   showKeyboard: boolean;
   showHandsGuide: boolean;
